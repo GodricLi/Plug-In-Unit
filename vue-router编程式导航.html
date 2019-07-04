@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vue-router-编程式导航</title>
+</head>
+<body>
+<div id="app"></div>
+
+
+<script type="text/javascript" src="../vuestudy/node_modules/vue/dist/vue.js"></script>
+<!--1 .引入vue-router对象-->
+<script type="text/javascript" src="./node_modules/vue-router/dist/vue-router.js"></script>
+
+<script type="text/javascript">
+    // https://www.xxxx/user/1      params参数
+    // https://www.xxxx/user?userId=1      query参数
+
+
+    let UserParams = {
+        template: `<div>UserParams</div>`,
+        created() {
+        },
+    };
+
+    let UserQuery = {
+        template: `<div>UserQuery</div>`,
+        created() {
+        },
+
+    };
+    // 3.创建一个路由对象
+    let router = new VueRouter({
+        // 配置对象
+        routes: [
+            {
+                name:"userParams",
+                path: "/user/:userId",
+                component: UserParams,
+            },
+            {
+                name:"userQuery",
+                path: "/user",
+                component: UserQuery,
+            }
+        ]
+    });
+
+    let App = {
+        template: `<div>
+                   <button @click="paramsHandler">Params</button>
+                   <button @click="queryHandler">Query</button>
+
+                    <router-view> </router-view>
+                    </div>`,
+        methods:{
+            // 使用this.$router.push改变url后面的参数
+            paramsHandler(){
+                this.$router.push({name:"userParams",params:{userId:1}})
+            },
+            queryHandler(){
+                this.$router.push({name:"userQuery",query:{userId:2}})
+            }
+        }
+    };
+
+    new Vue({
+        el: "#app",
+        template: `<App />`,
+        components: {
+            App
+        },
+        router:router, // vue中使用router
+    })
+</script>
+</body>
+</html>

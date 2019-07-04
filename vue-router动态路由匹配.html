@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vue-router-动态路由匹配</title>
+</head>
+<body>
+<div id="app"></div>
+
+
+<script type="text/javascript" src="../vuestudy/node_modules/vue/dist/vue.js"></script>
+<script type="text/javascript" src="./node_modules/vue-router/dist/vue-router.js"></script>
+<script type="text/javascript">
+
+    // 创建一个公共组件
+    let Common = {
+        data(){
+            return{
+                msg:"Common"
+            }
+        },
+        template: `<div>
+                    我是{{msg}}
+                  </div>`,
+        created(){
+            //动态路由匹配复用子组件，并没有销毁创建，此方法只会执行一次
+        },
+        watch:{
+            '$route'(to, from){
+                // 对路由变化做出响应，路由发生变化时执行
+                console.log(to);        // 路由改变之后的对象
+                console.log(from);      // 路由改变之前上一次的对象
+
+                // 获取改变之后的路由的参数id
+                this.msg = to.params.id
+            }
+        },
+    };
+
+    let Home = {
+        // 点击标签会匹配到routes里面的name属性，
+        template: `<div>
+
+                   <router-link :to="{name:'Common',params:{id:'python'}}">Python</router-link>
+                   <router-link :to="{name:'Common',params:{id:'frontend'}}">前端</router-link>
+
+                   <router-view></router-view>
+                  </div>`,
+
+
+    };
+    // 3.创建一个路由对象
+    let router = new VueRouter({
+        // 配置对象
+        routes: [
+            {
+                path: "/home",
+                component: Home,
+                children:[
+                    {   // 匹配到name属性，path后面的id属性根据params的值变化
+                        name:"Common",
+                        path:"/home/:id",
+                        component:Common
+                    },
+                    {
+                        path:"",
+                        component:Common,
+                    }
+
+                ]
+            },
+
+        ]
+    });
+
+    let App = {
+        template: `<div>
+
+                    <router-link to="/home">首页</router-link>
+
+                    <router-view> </router-view>
+                    </div>`,
+
+    };
+
+    new Vue({
+        el: "#app",
+        template: `<App />`,
+        components: {
+            App
+        },
+        router:router,
+    })
+</script>
+</body>
+</html>

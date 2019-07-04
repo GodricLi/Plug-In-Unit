@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vue-router-权限控制</title>
+</head>
+<body>
+<div id="app"></div>
+
+
+<script type="text/javascript" src="../vuestudy/node_modules/vue/dist/vue.js"></script>
+<script type="text/javascript" src="./node_modules/vue-router/dist/vue-router.js"></script>
+
+<script type="text/javascript">
+    // 导航栏上面有 首页，题库，热点，登陆，退出五个按钮。用户访问首页，热点可以查看其内容，
+
+    // 1.当用户访问题库时，此时检测用户是否有权限访问，检测用户是否登录过
+    // 只有登陆之后才能访问题库页面，未登录时访问会跳转到登陆页面，登陆成功后跳转到题库页面
+
+    // 2.在localStorage中存储用户名密码，并且立即跳转到题库页面，
+    // 当用户点击 退出， 删除该用户
+
+
+    let Home = {
+        template: `<div>首页</div>`,
+
+    };
+
+    let Questions = {
+        template: `<div>题库</div>`,
+
+    };
+    let Hot = {
+        template: `<div>热点</div>`,
+
+    };
+
+    let Login = {
+        data(){
+            return{
+                name:"",
+                pwd:""
+            }
+        },
+        template: `<div>
+                       <input type="text"  v-model="name">
+                       <input type="text" v-model="pwd">
+                       <input type="button" value="登陆" @click="loginHandler">
+                   </div>`,
+        methods: {
+            loginHandler() {
+                // 2.用户登陆，将用户信息存入localStorage
+                localStorage.setItem('user',{name:this.name,pwd:this.pwd});
+
+                // 跳转到题库，编程式导航
+                this.$router.push({name:"question"});
+
+            },
+        }
+
+    };
+
+
+    // 创建一个路由对象
+    let router = new VueRouter({
+        // 配置对象
+        routes: [
+            {
+                path: "/home",
+                component: Home,
+            },
+            {
+                name:"question",
+                path: "/question",
+                component: Questions,
+                meta:{
+                    auth:true       // 1.添加登陆认证给题库组件
+                }
+            },
+            {
+                path: "/hot",
+                component: Hot,
+            },
+            {
+                path: "/login",
+                component: Login
+            },
+
+        ]
+    });
+
+    // 创建一个全局导航守卫
+    router.beforeEach(function (to, from, next) {
+        if (to.meta.auth){
+            // 2.如果请求下一步的登陆认证存在，判断用户是否登录过
+            if (localStorage.getItem('user')){
+                // 用户登陆过，认证存在，通过
+                next()
+            }else {
+                // 用户未登录，登陆认证不存在，跳转到登陆界登陆认证
+                next({path:"/login"})
+            }
+
+
+        }else {
+            // 没有添加登陆认证的页面直接访问
+            next()
+        }
+        
+    });
+
+    let App = {
+        data(){
+            return{
+                isShow:true
+            }
+        },
+        template: `<div>
+
+                       <router-link to="/home">首页</router-link>
+                       <router-link to="/question">题库</router-link>
+                       <router-link to="/hot">热点</router-link>
+                       <router-link to="/login" v-if="isShow" @click.native="loginChange">登陆</router-link>
+                       <a href="javascript:void(0)" @click="logoutHandler">退出</a>
+                       <keep-alive>
+                           <router-view> </router-view>
+                       </keep-alive>
+
+                   </div>`,
+        methods:{
+            logoutHandler(){
+                // 退出清除localStorage里面的用户信息
+                localStorage.removeItem("user");
+
+                this.$router.push("/login")
+
+            },
+            loginChange(){
+
+            }
+
+        },
+
+
+
+    };
+
+    new Vue({
+        el: "#app",
+        template: `<App />`,
+        components: {
+            App
+        },
+        router: router,
+    })
+</script>
+</body>
+</html>

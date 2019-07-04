@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vue-router-嵌套路由</title>
+</head>
+<body>
+<div id="app"></div>
+
+
+<script type="text/javascript" src="../vuestudy/node_modules/vue/dist/vue.js"></script>
+<!--1 .引入vue-router对象-->
+<script type="text/javascript" src="./node_modules/vue-router/dist/vue-router.js"></script>
+
+<script type="text/javascript">
+
+    let Music = {
+        template: `<div>Music</div>`,
+
+    };
+
+    let Movie = {
+        template: `<div>Movie</div>`,
+
+
+    };
+
+    let Home = {
+        template: `<div>
+
+                   <router-link to="/home/music">Music</router-link>
+                   <router-link to="/home/movie">Movie</router-link>
+
+                   <router-view></router-view>
+                  </div>`,
+
+
+    };
+    let App = {
+        template: `<div>
+
+                    <router-link to="/home">首页</router-link>
+
+                    <router-view> </router-view>
+                    </div>`,
+        component: {
+            Home
+        },
+
+
+    };
+
+    let router = new VueRouter({
+        // 配置对象
+        routes: [
+
+            {
+                path: "/",
+                // redirect:{name:'hone'}
+                redirect: "/home"  // 访问时直接重定向到首页，默认访问首页数据
+            },
+            {
+                // 动态匹配路由
+                name: "home",
+                path: "/home",
+                component: Home,
+                children: [
+                    {   //当访问/home时，home组件的出口没有匹配到任何路由，不会渲染
+                        path:"",
+                        component:Music     // 默认渲染Music子组件
+                    },
+                    {
+                        // 动态的在子组件中匹配路由，表示子组件的结构是不同的
+                        // 不用加/， 自动拼接
+                        path: "music",
+                        component: Music,
+                    },
+                    {
+                        path: "movie",
+                        component: Movie,
+                    }
+                ]
+            },
+
+
+        ]
+    });
+
+
+    new Vue({
+        el: "#app",
+        template: `<App />`,
+        components: {
+            App
+        },
+        router: router,
+    })
+</script>
+</body>
+</html>
